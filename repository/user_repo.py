@@ -140,17 +140,3 @@ def fetch_users_by_rating():
     ON u.id = up.user_id
     ORDER BY up.overall_score DESC,
     up.won DESC, up.played ASC""")
-
-
-# execute_commit("""
-# CREATE TABLE users (
-#     id INTEGER PRIMARY KEY,
-#     real_name TEXT NOT NULL,
-#     user_name TEXT,
-#     active INTEGER DEFAULT 1 CHECK(active IN (1, 0)),
-#     role TEXT NOT NULL,
-#     created_at TEXT
-# );""")
-
-# execute_commit("""
-# DELETE FROM user_profiles""")

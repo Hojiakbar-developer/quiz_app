@@ -3,7 +3,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-LOG_FILE = BASE_DIR / "logs" / "app.log"
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+LOG_FILE = LOG_DIR / "app.log"
 
 logger = logging.getLogger("quiz_app")
 

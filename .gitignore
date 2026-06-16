@@ -1,16 +1,16 @@
 .venv/
 venv/
 
-__pycache/
+__pycache__/
 
 *.pyc
 
 .env
 
 logs/
-*.app_log
 
-*.db
+database/data/quiz.db
+!database/data/starter_quiz.db
 
 .idea/
 
