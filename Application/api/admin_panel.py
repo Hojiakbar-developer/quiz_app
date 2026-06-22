@@ -9,7 +9,7 @@ from quiz_app.service.game_service import (get_active_plays, view_user_answers,
                                            get_sessions_list, get_viewer_mode, user_answers_by_id)
 from quiz_app.service.user_service import get_user_by_id, register_user
 
-def admin_start_command(update, context):
+async def admin_start_command(update, context):
     admin_id = update.effective_user.id
     first_name = update.effective_user.first_name
     user_name = update.effective_user.username
@@ -20,43 +20,43 @@ def admin_start_command(update, context):
     if not admin:
         register_user(admin_id, first_name, user_name, "en")
 
-    update.message.reply_text(text=f"{greet('en')}, Sir.\nWe are ready!",
+    await update.message.reply_text(text=f"{greet('en')}, Sir.\nWe are ready!",
                               reply_markup=ReplyKeyboardMarkup(keyboards,
                                                                resize_keyboard=True))
 
-def admin_keyboard_handler(update, context):
+async def admin_keyboard_handler(update, context):
     data = update.message.text
 
     if data == "Control Users":
         users = get_users_list()
         buttons = control_users_buttons()
 
-        update.message.reply_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
-        update.message.delete()
+        await update.message.reply_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+        await update.message.delete()
 
     elif data == "🌐 Viewer Mode":
         active_players = get_viewer_mode()
         viewer_buttons = get_viewer_mode_buttons()
 
-        update.message.reply_text(text=active_players, reply_markup=InlineKeyboardMarkup(viewer_buttons))
-        update.message.delete()
+        await update.message.reply_text(text=active_players, reply_markup=InlineKeyboardMarkup(viewer_buttons))
+        await update.message.delete()
 
     elif data == "📜 History":
         keyboards = history_buttons()
 
-        update.message.reply_text(text="📜 History", reply_markup=InlineKeyboardMarkup(keyboards))
-        update.message.delete()
+        await update.message.reply_text(text="📜 History", reply_markup=InlineKeyboardMarkup(keyboards))
+        await update.message.delete()
 
     elif data == "👤 Profiles":
         close_button = [[InlineKeyboardButton(text="Close", callback_data="profile:close")]]
 
-        update.message.reply_text(text=get_users_profiles(), reply_markup=InlineKeyboardMarkup(close_button))
-        update.message.delete()
+        await update.message.reply_text(text=get_users_profiles(), reply_markup=InlineKeyboardMarkup(close_button))
+        await update.message.delete()
 
     else:
-        update.message.delete()
+        await update.message.delete()
 
-def admin_query_router(update, context):
+async def admin_query_router(update, context):
     query = update.callback_query
 
     parts = query.data.split(":")
@@ -65,34 +65,34 @@ def admin_query_router(update, context):
     data = parts[1]
 
     if prefix == "control":
-        control_users_query_handler(query, data)
+        await control_users_query_handler(query, data)
         return
 
     elif prefix == "history":
-        history_query_handler(query, data)
+        await history_query_handler(query, data)
         return
 
     elif prefix == "viewer_mode":
-        viewer_mode_query_handler(query, data)
+        await viewer_mode_query_handler(query, data)
         return
 
     elif prefix == "profile":
-        profiles_query_handler(query, data)
+        await profiles_query_handler(query, data)
         return
 
-def control_users_query_handler(query, data):
+async def control_users_query_handler(query, data):
 
     if data == "deactivate":
         users = get_users_list()
         buttons = control_users_id_buttons("control", "deactivate_")
 
-        query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "reactivate":
         users = get_users_list()
         buttons = control_users_id_buttons("control", "reactivate_")
 
-        query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif "deactivate_" in data:
         user_id = int(data.strip("deactivate_"))
@@ -105,7 +105,7 @@ def control_users_query_handler(query, data):
                 users = get_users_list()
                 buttons = control_users_id_buttons("control", "deactivate_")
 
-                query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+                await query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif "reactivate_" in data:
         user_id = int(data.strip("reactivate_"))
@@ -118,31 +118,31 @@ def control_users_query_handler(query, data):
                 users = get_users_list()
                 buttons = control_users_id_buttons("control", "reactivate_")
 
-                query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+                await query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "back":
         users = get_users_list()
         buttons = control_users_buttons()
 
-        query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "close":
-        query.message.delete()
+        await query.message.delete()
 
-def history_query_handler(query, data):
+async def history_query_handler(query, data):
 
     if data == "all_users_sessions" or data == "refresh_sessions_list":
         sessions = get_sessions_list()
         buttons = sessions_list_buttons()
 
-        query.edit_message_text(text=sessions, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=sessions, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "one_user_answers":
         users = get_users_list()
         buttons = history_users_id_buttons()
 
-        query.message.reply_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
-        query.message.delete()
+        await query.message.reply_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.message.delete()
 
     elif "one_user_answers_" in data:
         user_id = int(data.strip("one_user_answers_"))
@@ -150,7 +150,7 @@ def history_query_handler(query, data):
 
         buttons = history_one_user_answers_buttons(user_id)
 
-        query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif "refresh_" in data:
         user_id = int(data.strip("refresh_"))
@@ -158,23 +158,23 @@ def history_query_handler(query, data):
 
         buttons = history_one_user_answers_buttons(user_id)
 
-        query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "back_users_id":
         users = get_users_list()
         buttons = history_users_id_buttons()
 
-        query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=users, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "back":
         buttons = history_buttons()
 
-        query.edit_message_text(text="📜 History", reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text="📜 History", reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "close":
-        query.message.delete()
+        await query.message.delete()
 
-def viewer_mode_query_handler(query, data):
+async def viewer_mode_query_handler(query, data):
 
     if "view_" in data:
         session_id = int(data.strip("view_"))
@@ -182,28 +182,28 @@ def viewer_mode_query_handler(query, data):
         user_play = view_user_answers(session_id)
         buttons = viewer_user_answers_buttons(session_id)
 
-        query.edit_message_text(text=user_play, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=user_play, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif "refresh_" in data:
         session_id = int(data.strip("refresh_"))
         user_play = view_user_answers(session_id)
         buttons = viewer_user_answers_buttons(session_id)
 
-        query.edit_message_text(text=user_play, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=user_play, reply_markup=InlineKeyboardMarkup(buttons))
 
     elif data == "back":
         active_players = get_viewer_mode()
         viewer_buttons = get_viewer_mode_buttons()
 
-        query.edit_message_text(text=active_players, reply_markup=InlineKeyboardMarkup(viewer_buttons))
+        await query.edit_message_text(text=active_players, reply_markup=InlineKeyboardMarkup(viewer_buttons))
 
     elif data == "close":
-        query.message.delete()
+        await query.message.delete()
 
-def profiles_query_handler(query, data):
+async def profiles_query_handler(query, data):
 
     if data == "close":
-        query.message.delete()
+        await query.message.delete()
 
 def main_keyboards():
     keyboards = [

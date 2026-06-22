@@ -1,4 +1,5 @@
-from time import sleep
+import asyncio
+
 from quiz_app.locales.messages import msg
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -14,7 +15,7 @@ from quiz_app.service.question_service import (check_answer_correctness, get_ans
                                                get_question_and_answers, get_correct_answer,
                                                get_translated_question_and_answers)
 
-def start_game(update, user, context):
+async def start_game(update, user, context):
     user_id = user.id
     real_name = user.first_name
     played = get_user_played(user_id)
@@ -25,13 +26,13 @@ def start_game(update, user, context):
     context.user_data["start_time"] = start_time
     lang = get_user_lang(user_id)
 
-    mssg = update.message.reply_text(text=f"\n{msg(lang, 'played')}: {played}\n{msg(lang, 'dear')} {real_name}, {msg(lang, 'game_started')}!")
-    sleep(2)
-    mssg.delete()
+    mssg = await update.message.reply_text(text=f"\n{msg(lang, 'played')}: {played}\n{msg(lang, 'dear')} {real_name}, {msg(lang, 'game_started')}!")
+    await asyncio.sleep(2)
+    await mssg.delete()
 
-    first_question(update, user, context)
+    await first_question(update, user, context)
 
-def first_question(update, user, context):
+async def first_question(update, user, context):
     session_id = context.user_data["session_id"]
     lang = get_user_lang(user.id)
 
@@ -44,9 +45,9 @@ def first_question(update, user, context):
     answers_id = get_answers_id(question_id)
     answer_buttons = answers_inline_buttons(answers_id, user, context)
 
-    update.message.reply_text(text=quest, reply_markup=InlineKeyboardMarkup(answer_buttons))
+    await update.message.reply_text(text=quest, reply_markup=InlineKeyboardMarkup(answer_buttons))
 
-def next_quests(query, user, context):
+async def next_quests(query, user, context):
     session_id = context.user_data["session_id"]
     lang = get_user_lang(user.id)
 
@@ -59,9 +60,9 @@ def next_quests(query, user, context):
     answers_id = get_answers_id(question_id)
     answer_buttons = answers_inline_buttons(answers_id, user, context)
 
-    query.edit_message_text(text=quest, reply_markup=InlineKeyboardMarkup(answer_buttons))
+    await query.edit_message_text(text=quest, reply_markup=InlineKeyboardMarkup(answer_buttons))
 
-def check_answer_flow(query, answer_id, user, context):
+async def check_answer_flow(query, answer_id, user, context):
     session_id = context.user_data["session_id"]
     lang = get_user_lang(user.id)
 
@@ -77,9 +78,9 @@ def check_answer_flow(query, answer_id, user, context):
         current_score += 1
         update_current_score(session_id, current_score)
 
-        mssg = query.message.reply_text(text=f"{msg(lang, 'correct')} ✅")
-        sleep(2)
-        mssg.delete()
+        mssg = await query.message.reply_text(text=f"{msg(lang, 'correct')} ✅")
+        await asyncio.sleep(2)
+        await mssg.delete()
 
     else:
         final_score = current_score
@@ -87,18 +88,18 @@ def check_answer_flow(query, answer_id, user, context):
 
         spent = finish_game(session_id, user, final_score, started_at)
 
-        msg1 = query.message.reply_text(text=f"{msg(lang, 'wrong')} ❌")
+        msg1 = await query.message.reply_text(text=f"{msg(lang, 'wrong')} ❌")
 
         correct_one = context.user_data["correct_answer"]
-        msg2 = query.message.reply_text(text=f"{msg(lang, 'correct_answer_was')}"
+        msg2 = await query.message.reply_text(text=f"{msg(lang, 'correct_answer_was')}"
                                              f"\n{correct_one}")
 
-        sleep(3)
-        query.message.delete()
-        msg1.delete()
-        msg2.delete()
+        await asyncio.sleep(3)
+        await query.message.delete()
+        await msg1.delete()
+        await msg2.delete()
 
-        show_final_result(query, user, final_score, spent)
+        await show_final_result(query, user, final_score, spent)
         context.user_data["session_id"] = None
         context.user_data["start_time"] = None
 
@@ -110,16 +111,16 @@ def check_answer_flow(query, answer_id, user, context):
 
         spent = finish_game(session_id, user, final_score, started_at)
 
-        query.message.delete()
+        await query.message.delete()
 
-        show_final_result(query, user, final_score, spent)
+        asyncio.create_task(show_final_result(query, user, final_score, spent))
 
-        query.message.reply_text(text=f"{msg(lang, 'you_won').upper()}!!!")
+        await query.message.reply_text(text=f"{msg(lang, 'you_won').upper()}!!!")
         context.user_data["session_id"] = None
         context.user_data["start_time"] = None
         return
 
-    next_quests(query, user, context)
+    await next_quests(query, user, context)
 
 def answers_inline_buttons(answers, user, context):
     lang = get_user_lang(user.id)
@@ -139,7 +140,7 @@ def answers_inline_buttons(answers, user, context):
         [InlineKeyboardButton(text=f"{msg(lang, 'help').upper()}", callback_data="game:help")]
     ]
     return inline_buttons
-#
+
 def help_50_50_variants_buttons(new_variants):
     new_buttons = []
 
@@ -148,7 +149,7 @@ def help_50_50_variants_buttons(new_variants):
 
     return new_buttons
 
-def request_help_50_50(query, user, context):
+async def request_help_50_50(query, user, context):
     session_id = context.user_data["session_id"]
     lang = get_user_lang(user.id)
     help_50_50, count = check_current_help_50_50(session_id)
@@ -169,9 +170,9 @@ def request_help_50_50(query, user, context):
     buttons = help_50_50_variants_buttons(new_variants)
 
     help_50_50_used(session_id, user)
-    query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+    await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
-def request_help_change_quest(query, user, context):
+async def request_help_change_quest(query, user, context):
     session_id = context.user_data["session_id"]
     lang = get_user_lang(user.id)
     change_quest, count = check_current_help_change_quest(session_id)
@@ -180,7 +181,7 @@ def request_help_change_quest(query, user, context):
         raise ValueError(f"{msg(lang, 'change_quest_used')}!")
 
     help_change_quest_used(session_id, user)
-    next_quests(query, user, context)
+    await next_quests(query, user, context)
 
 def help_buttons(user, context):
     lang = get_user_lang(user.id)
@@ -212,7 +213,7 @@ def save_correct_variant(user, context):
 
     context.user_data["correct_answer"] = correct
 
-def show_final_result(query, user, final_score, spent_time):
+async def show_final_result(query, user, final_score, spent_time):
     minutes, seconds = divmod(spent_time, 60)
     lang = get_user_lang(user.id)
 
@@ -221,9 +222,9 @@ def show_final_result(query, user, final_score, spent_time):
                     f"\n⌛ {msg(lang, 'spent_time')}: {minutes} {msg(lang, 'minutes')} "
                                                        f"{seconds} {msg(lang, 'seconds')}")
 
-    mssg = query.message.reply_text(text=final_result)
-    sleep(5)
-    mssg.delete()
+    mssg = await query.message.reply_text(text=final_result)
+    await asyncio.sleep(5)
+    await mssg.delete()
 
 def get_quests(current_score, lang):
     if lang == "en":

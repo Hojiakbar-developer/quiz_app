@@ -1,4 +1,5 @@
-from time import sleep
+import asyncio
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from quiz_app.Application.api.game import start_game
 from quiz_app.service.user_service import get_one_user_active
@@ -6,7 +7,7 @@ from quiz_app.service.profile_service import get_user_lang, get_user_profile, ge
 
 from quiz_app.locales.messages import msg
 
-def users_keyboard_handler(update, context):
+async def users_keyboard_handler(update, context):
     data = update.message.text
     user = update.effective_user
     lang = get_user_lang(user.id)
@@ -16,25 +17,25 @@ def users_keyboard_handler(update, context):
 
     if data == f"🎮 {msg(lang, 'start_game')}":
         if active_status:
-            start_game(update, user, context)
+            asyncio.create_task(start_game(update, user, context))
 
-            update.message.delete()
+            await update.message.delete()
 
         else:
-            update.message.delete()
-            mssg = update.message.reply_text(text=f"🔴 {msg(lang, 'you_inactive')}!")
-            sleep(3)
-            mssg.delete()
+            await update.message.delete()
+            mssg = await update.message.reply_text(text=f"🔴 {msg(lang, 'you_inactive')}!")
+            await asyncio.sleep(3)
+            await mssg.delete()
 
     elif data == f"🏆 {msg(lang, 'rating')}":
         close_button = [[InlineKeyboardButton(text=f"{msg(lang, 'close')}", callback_data="game:close")]]
-        update.message.reply_text(text=get_rating(user.id), reply_markup=InlineKeyboardMarkup(close_button))
-        update.message.delete()
+        await update.message.reply_text(text=get_rating(user.id), reply_markup=InlineKeyboardMarkup(close_button))
+        await update.message.delete()
 
     elif data == f"👤 {msg(lang, 'profile')}":
         close_button = [[InlineKeyboardButton(text=f"{msg(lang, 'close')}", callback_data="game:close")]]
-        update.message.reply_text(text=get_user_profile(user.id), reply_markup=InlineKeyboardMarkup(close_button))
-        update.message.delete()
+        await update.message.reply_text(text=get_user_profile(user.id), reply_markup=InlineKeyboardMarkup(close_button))
+        await update.message.delete()
 
     else:
-        update.message.delete()
+        await update.message.delete()

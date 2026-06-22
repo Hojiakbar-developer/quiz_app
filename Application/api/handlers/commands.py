@@ -5,7 +5,7 @@ from quiz_app.service.profile_service import get_user_lang
 
 from quiz_app.locales.messages import msg
 
-def users_start_command(update, context):
+async def users_start_command(update, context):
     user_id = update.effective_user.id
     real_name = update.effective_user.first_name
 
@@ -15,15 +15,15 @@ def users_start_command(update, context):
         lang = get_user_lang(user_id)
         keyboards = main_keyboards(lang)
 
-        update.message.reply_text(text=f"{greet(lang)}, {real_name}", reply_markup=ReplyKeyboardMarkup(keyboards,
+        await update.message.reply_text(text=f"{greet(lang)}, {real_name}", reply_markup=ReplyKeyboardMarkup(keyboards,
                                                                                                    resize_keyboard=True))
         return
 
-    update.message.reply_text(text=f"{greet('en')}, {real_name}")
-    update.message.reply_text(text="Which language?",
-                                  reply_markup=InlineKeyboardMarkup(language_buttons("start_language", "en")))
+    await update.message.reply_text(text=f"{greet('en')}, {real_name}"
+                                         f"\nWhich language?",
+                                    reply_markup=InlineKeyboardMarkup(language_buttons("start_language", "en")))
 
-def change_lang_command_handler(update, context):
+async def change_lang_command_handler(update, context):
     user = update.effective_user
     lang = get_user_lang(user.id)
 
@@ -32,8 +32,8 @@ def change_lang_command_handler(update, context):
     cancel_button = [InlineKeyboardButton(text=f"{msg(lang, 'cancel')}", callback_data="change_language:cancel")]
     buttons.append(cancel_button)
 
-    update.message.reply_text(text=f"{msg(lang, 'which_lang')}?", reply_markup=InlineKeyboardMarkup(buttons))
-    update.message.delete()
+    await update.message.reply_text(text=f"{msg(lang, 'which_lang')}?", reply_markup=InlineKeyboardMarkup(buttons))
+    await update.message.delete()
 
 def main_keyboards(lang):
     keyboards = [

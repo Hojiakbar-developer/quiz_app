@@ -1,4 +1,6 @@
-from telegram.ext import Filters, MessageHandler, CallbackQueryHandler, Updater, CommandHandler
+from telegram.ext import (
+    Application, filters, MessageHandler,
+    CallbackQueryHandler, CommandHandler)
 
 from router import start_router, query_router, keyboard_router
 from handlers.commands import change_lang_command_handler
@@ -8,17 +10,14 @@ if not API_TOKEN:
     raise ValueError("Not found API KEY in .env file")
 
 def main():
-    updater = Updater(token=API_TOKEN)
-    dispatcher = updater.dispatcher
+    app = Application.builder().token(API_TOKEN).build()
 
+    app.add_handler(CommandHandler("start", start_router))
+    app.add_handler(CommandHandler("changelang", change_lang_command_handler))
+    app.add_handler(CallbackQueryHandler(query_router))
+    app.add_handler(MessageHandler(filters.TEXT, keyboard_router))
 
-    dispatcher.add_handler(CommandHandler("start", start_router))
-    dispatcher.add_handler(CommandHandler("changelang", change_lang_command_handler))
-    dispatcher.add_handler(CallbackQueryHandler(query_router))
-    dispatcher.add_handler(MessageHandler(Filters.text, keyboard_router))
-
-    updater.start_polling()
-    updater.idle()
+    app.run_polling()
 
 if __name__ == '__main__':
     main()

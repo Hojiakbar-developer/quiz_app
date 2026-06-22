@@ -5,37 +5,37 @@ from handlers.messages import users_keyboard_handler
 from handlers.queries import (game_query_handler, start_language_query_handler,
                               change_language_query_handler)
 
-def start_router(update, context):
+async def start_router(update, context):
     user = update.effective_user
 
     if is_admin(user.id):
-        admin_start_command(update, context)
+        await admin_start_command(update, context)
         return
 
-    users_start_command(update, context)
+    await users_start_command(update, context)
     return
 
-def keyboard_router(update, context):
+async def keyboard_router(update, context):
     user = update.effective_user
 
     if is_admin(user.id):
-        admin_keyboard_handler(update, context)
+        await admin_keyboard_handler(update, context)
         return
 
-    users_keyboard_handler(update, context)
+    await users_keyboard_handler(update, context)
     return
 
-def query_router(update, context):
+async def query_router(update, context):
     user = update.effective_user
 
     if is_admin(user.id):
-        admin_query_router(update, context)
+        await admin_query_router(update, context)
         return
 
-    users_query_router(update, context)
+    await users_query_router(update, context)
     return
 
-def users_query_router(update, context):
+async def users_query_router(update, context):
     query = update.callback_query
     user = update.effective_user
 
@@ -45,11 +45,11 @@ def users_query_router(update, context):
     data = parts[1]
 
     if prefix == "game":
-        game_query_handler(query, data, user, context)
+        await game_query_handler(query, data, user, context)
         return
 
     elif prefix == "start_language":
-        start_language_query_handler(query, data, user)
+        await start_language_query_handler(query, data, user)
 
     elif prefix == "change_language":
-        change_language_query_handler(query, data, user)
+        await change_language_query_handler(query, data, user)
