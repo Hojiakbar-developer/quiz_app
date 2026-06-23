@@ -133,9 +133,9 @@ async def history_query_handler(query, data):
 
     if data == "all_users_sessions" or data == "refresh_sessions_list":
         sessions = get_sessions_list()
-        buttons = sessions_list_buttons()
+        back_button = [[InlineKeyboardButton(text="⬅️ Back", callback_data="history:back")]]
 
-        await query.edit_message_text(text=sessions, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=sessions, reply_markup=InlineKeyboardMarkup(back_button))
 
     elif data == "one_user_answers":
         users = get_users_list()
@@ -148,17 +148,9 @@ async def history_query_handler(query, data):
         user_id = int(data.strip("one_user_answers_"))
         answers = user_answers_by_id(user_id)
 
-        buttons = history_one_user_answers_buttons(user_id)
+        back_button = [[InlineKeyboardButton(text="⬅️ Back", callback_data="history:back_users_id")]]
 
-        await query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(buttons))
-
-    elif "refresh_" in data:
-        user_id = int(data.strip("refresh_"))
-        answers = user_answers_by_id(user_id)
-
-        buttons = history_one_user_answers_buttons(user_id)
-
-        await query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(buttons))
+        await query.edit_message_text(text=answers, reply_markup=InlineKeyboardMarkup(back_button))
 
     elif data == "back_users_id":
         users = get_users_list()
@@ -275,19 +267,16 @@ def history_users_id_buttons():
 
         row.append(InlineKeyboardButton(text=f"User {user}", callback_data=f"history:one_user_answers_{uid}"))
 
+        if len(row) == 3:
+            inline_buttons.append(row)
+            row = []
+
     if row:
         inline_buttons.append(row)
 
-    inline_buttons.append([InlineKeyboardButton(text="Back", callback_data=f"history:back")])
+    inline_buttons.append([InlineKeyboardButton(text="⬅️ Back", callback_data=f"history:back")])
 
     return inline_buttons
-
-def history_one_user_answers_buttons(user_id):
-    buttons = [
-        [InlineKeyboardButton(text="🔄️ Refresh", callback_data=f"history:refresh_{user_id}")],
-        [InlineKeyboardButton(text="⬅️ Back", callback_data="history:back_users_id")]
-    ]
-    return buttons
 
 def get_viewer_mode_buttons():
     active_players = get_active_plays()
@@ -314,12 +303,5 @@ def viewer_user_answers_buttons(session_id):
     buttons = [
         [InlineKeyboardButton(text="🔄️ Refresh", callback_data=f"viewer_mode:refresh_{session_id}")],
         [InlineKeyboardButton(text="⬅️ Back", callback_data="viewer_mode:back")]
-    ]
-    return buttons
-
-def sessions_list_buttons():
-    buttons = [
-        [InlineKeyboardButton(text="🔄️ Refresh", callback_data="history:refresh_sessions_list")],
-        [InlineKeyboardButton(text="⬅️ Back", callback_data="history:back")]
     ]
     return buttons

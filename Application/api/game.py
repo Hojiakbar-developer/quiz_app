@@ -115,9 +115,11 @@ async def check_answer_flow(query, answer_id, user, context):
 
         asyncio.create_task(show_final_result(query, user, final_score, spent))
 
-        await query.message.reply_text(text=f"{msg(lang, 'you_won').upper()}!!!")
+        mssg = await query.message.reply_text(text=f"{msg(lang, 'you_won').upper()}!!!")
         context.user_data["session_id"] = None
         context.user_data["start_time"] = None
+        await asyncio.sleep(2)
+        await mssg.delete()
         return
 
     await next_quests(query, user, context)
