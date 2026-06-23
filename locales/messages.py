@@ -50,7 +50,9 @@ MESSAGES = {
         "change_quest": "Change question",
         "50_50": "50/50",
         "help_50_50_used": "50/50 help was used",
-        "change_quest_used": "Change quest help was used"
+        "change_quest_used": "Change quest help was used",
+        "settings": "Settings",
+        "change_lang": "Change language"
     },
 
     "uz": {
@@ -104,7 +106,9 @@ MESSAGES = {
         "change_quest": "Savolni o'zgartirish",
         "50_50": "50 ga 50",
         "help_50_50_used": "50 ga 50 yordami ishlatilgan",
-        "change_quest_used": "Savol o'zgartirish yordami ishlatilgan"
+        "change_quest_used": "Savol o'zgartirish yordami ishlatilgan",
+        "settings": "Sozlamalar",
+        "change_lang": "Tilni o'zgartirish"
     }
 }
 

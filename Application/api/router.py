@@ -3,7 +3,7 @@ from admin_panel import admin_start_command, admin_keyboard_handler, admin_query
 from handlers.commands import users_start_command
 from handlers.messages import users_keyboard_handler
 from handlers.queries import (game_query_handler, start_language_query_handler,
-                              change_language_query_handler)
+                              settings_query_handler)
 
 async def start_router(update, context):
     user = update.effective_user
@@ -51,5 +51,5 @@ async def users_query_router(update, context):
     elif prefix == "start_language":
         await start_language_query_handler(query, data, user)
 
-    elif prefix == "change_language":
-        await change_language_query_handler(query, data, user)
+    elif prefix == "settings":
+        await settings_query_handler(query, data, user)

@@ -1,15 +1,16 @@
 import asyncio
-from telegram import InlineKeyboardMarkup, ReplyKeyboardMarkup
+from telegram import InlineKeyboardMarkup, ReplyKeyboardMarkup, InlineKeyboardButton
 
 from quiz_app.Application.api.game import (check_answer_flow, help_buttons, request_help_50_50,
                                            request_help_change_quest, answers_inline_buttons)
 
 from quiz_app.service.game_service import (get_current_question)
 from quiz_app.service.user_service import register_user
-from quiz_app.service.profile_service import update_user_lang
+from quiz_app.service.profile_service import update_user_lang, get_user_lang, get_settings
 from quiz_app.service.question_service import get_answers_id
 
-from quiz_app.Application.api.handlers.commands import main_keyboards
+from quiz_app.Application.api.handlers.commands import main_keyboards, language_buttons
+from quiz_app.Application.api.handlers.messages import settings_buttons
 
 from quiz_app.locales.messages import msg
 from quiz_app.logger import logger
@@ -27,7 +28,17 @@ async def start_language_query_handler(query, data, user):
         await query.message.reply_text(text=f"{msg(lang, 'welcome')}", reply_markup=ReplyKeyboardMarkup(keyboards,
                                          resize_keyboard=True))
 
-async def change_language_query_handler(query, data, user):
+async def settings_query_handler(query, data, user):
+
+    if data == "change_lang":
+        lang = get_user_lang(user.id)
+        buttons = language_buttons("settings", lang)
+
+        back_button = [InlineKeyboardButton(text=f"{msg(lang, 'back')}", callback_data="settings:back_to_setting")]
+
+        buttons.append(back_button)
+
+        await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
 
     if data == "en" or data == "uz":
         try:
@@ -35,7 +46,9 @@ async def change_language_query_handler(query, data, user):
 
             update_user_lang(user, lang)
 
-            await query.message.delete()
+            user_setting = get_settings(user.id)
+
+            await query.edit_message_text(text=user_setting, reply_markup=InlineKeyboardMarkup(settings_buttons(lang)))
 
             keyboards = main_keyboards(lang)
 
@@ -47,7 +60,12 @@ async def change_language_query_handler(query, data, user):
             await asyncio.sleep(2)
             await mssg.delete()
 
-    elif data == "cancel":
+    elif data == "back_to_setting":
+        lang = get_user_lang(user.id)
+        buttons = settings_buttons(lang)
+        await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(buttons))
+
+    elif data == "close":
         await query.message.delete()
 
 async def game_query_handler(query, data, user, context):

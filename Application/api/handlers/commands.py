@@ -23,23 +23,24 @@ async def users_start_command(update, context):
                                          f"\nWhich language?",
                                     reply_markup=InlineKeyboardMarkup(language_buttons("start_language", "en")))
 
-async def change_lang_command_handler(update, context):
-    user = update.effective_user
-    lang = get_user_lang(user.id)
-
-    buttons = language_buttons("change_language", lang)
-
-    cancel_button = [InlineKeyboardButton(text=f"{msg(lang, 'cancel')}", callback_data="change_language:cancel")]
-    buttons.append(cancel_button)
-
-    await update.message.reply_text(text=f"{msg(lang, 'which_lang')}?", reply_markup=InlineKeyboardMarkup(buttons))
-    await update.message.delete()
+# async def change_lang_command_handler(update, context):
+#     user = update.effective_user
+#     lang = get_user_lang(user.id)
+#
+#     buttons = language_buttons("change_language", lang)
+#
+#     cancel_button = [InlineKeyboardButton(text=f"{msg(lang, 'cancel')}", callback_data="change_language:cancel")]
+#     buttons.append(cancel_button)
+#
+#     await update.message.reply_text(text=f"{msg(lang, 'which_lang')}?", reply_markup=InlineKeyboardMarkup(buttons))
+#     await update.message.delete()
 
 def main_keyboards(lang):
     keyboards = [
         [KeyboardButton(text=f"🎮 {msg(lang, 'start_game')}"),
          KeyboardButton(text=f"🏆 {msg(lang, 'rating')}")],
-        [KeyboardButton(text=f"👤 {msg(lang, 'profile')}")]
+        [KeyboardButton(text=f"👤 {msg(lang, 'profile')}"),
+         KeyboardButton(text=f"⚙️ {msg(lang, 'settings')}")]
     ]
     return keyboards
 

@@ -3,7 +3,7 @@ import asyncio
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from quiz_app.Application.api.game import start_game
 from quiz_app.service.user_service import get_one_user_active
-from quiz_app.service.profile_service import get_user_lang, get_user_profile, get_rating
+from quiz_app.service.profile_service import get_user_lang, get_user_profile, get_rating, get_settings
 
 from quiz_app.locales.messages import msg
 
@@ -37,5 +37,18 @@ async def users_keyboard_handler(update, context):
         await update.message.reply_text(text=get_user_profile(user.id), reply_markup=InlineKeyboardMarkup(close_button))
         await update.message.delete()
 
+    elif data == f"⚙️ {msg(lang, 'settings')}":
+        buttons = settings_buttons(lang)
+
+        await update.message.reply_text(get_settings(user.id), reply_markup=InlineKeyboardMarkup(buttons))
+        await update.message.delete()
+
     else:
         await update.message.delete()
+
+def settings_buttons(lang):
+    buttons = [
+        [InlineKeyboardButton(text=f"🌐 {msg(lang, 'change_lang')}", callback_data="settings:change_lang")],
+        [InlineKeyboardButton(text=f"{msg(lang, 'close')}", callback_data="settings:close")]
+    ]
+    return buttons

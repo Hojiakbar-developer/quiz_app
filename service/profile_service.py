@@ -178,3 +178,14 @@ def update_user_lang(user, lang):
 def get_user_lang(user_id):
     lang = fetch_user_language(user_id)[0]
     return lang
+
+def get_settings(user_id):
+    user_lang = get_user_lang(user_id)
+
+    user_setting = f"====== {msg(user_lang, 'settings')} ======\n"
+    if user_lang == "en":
+         user_setting += f"\n🌐 {msg(user_lang, 'language')}: English"
+    elif user_lang == "uz":
+        user_setting += f"\n🌐 {msg(user_lang, 'language')}: Uzbek"
+
+    return user_setting
