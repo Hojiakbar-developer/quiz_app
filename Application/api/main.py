@@ -9,7 +9,7 @@ if not API_TOKEN:
     raise ValueError("Not found API KEY in .env file")
 
 def main():
-    app = Application.builder().token(API_TOKEN).build()
+    app = Application.builder().token(API_TOKEN).concurrent_updates(True).build()
 
     app.add_handler(CommandHandler("start", start_router))
     app.add_handler(CallbackQueryHandler(query_router))
